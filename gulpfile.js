@@ -9,6 +9,7 @@ var cssmin = require('gulp-cssmin');
 var less = require('gulp-less');
 var fs = require('fs');
 var chalk = require('chalk');
+var sourcemaps = require('gulp-sourcemaps');
 
 function getFolders(dir) {
     return fs.readdirSync(dir)
@@ -39,31 +40,46 @@ gulp.task('build', function() {
     console.log('\n\n');
     // ---------------------------------------
 
-    process.stdout.write(chalk.blue('(1/3)') + ' Compile and build main javascript file: ');
+    process.stdout.write(chalk.blue('(1/4)') + ' Compile and build main javascript file: ');
 
-        gulp.src(['./src/app.js', './src/assets/js/view.js'])
-            //.pipe(uglify())
+        gulp.src(['./src/app.js'])
+            .pipe(sourcemaps.init())
+            .pipe(concat('app.js'))
+            .pipe(uglify())
             .pipe(rename(function(path) {
                 path.extname = '.min.js';
             }))
+            .pipe(sourcemaps.write('../assets', {sourceRoot: '/src/'}))
+            .pipe(gulp.dest('./dist/assets'));
+
+        gulp.src(['./src/assets/js/view.js'])
+            .pipe(sourcemaps.init())
+            .pipe(concat('view.js'))
+            .pipe(uglify())
+            .pipe(rename(function(path) {
+                path.extname = '.min.js';
+            }))
+            .pipe(sourcemaps.write('../assets', {sourceRoot: '/src/assets/js/'}))
             .pipe(gulp.dest('./dist/assets'));
 
         console.log(chalk.green('Complete'));
 
     // ---------------------------------------
 
-    process.stdout.write(chalk.blue('(2/3)') + ' Compile and build main javascript file: ');
+    process.stdout.write(chalk.blue('(2/4)') + ' Compile and build main javascript file: ');
 
         var folders = getFolders('./src/modules/');
 
         var tasks = folders.map(function(folder) {
 
             gulp.src('./src/modules/' + folder + '/**/*.js')
+                .pipe(sourcemaps.init())
                 .pipe(concat(folder + '.js'))
-                //.pipe(uglify())
+                .pipe(uglify())
                 .pipe(rename(function(path) {
                     path.extname = '.min.js';
                 }))
+                .pipe(sourcemaps.write('../assets', {sourceRoot: '/src/modules/' + folder}))
                 .pipe(gulp.dest('./dist/assets/'));
 
             gulp.src('./src/modules/' + folder + '/views/**/*')
@@ -75,15 +91,26 @@ gulp.task('build', function() {
 
     // ---------------------------------------
 
-    process.stdout.write(chalk.blue('(3/3)') + ' Compile and build less files: ');
+    process.stdout.write(chalk.blue('(3/4)') + ' Compile and build less files: ');
 
     gulp.src('./src/assets/less/app.less')
+        .pipe(sourcemaps.init())
         .pipe(less())
-        .pipe(cssmin())
+        /*.pipe(cssmin())*/
         .pipe(rename(function(path) {
             path.extname = '.min.css';
         }))
+        .pipe(sourcemaps.write('../assets'))
         .pipe(gulp.dest('./dist/assets'));
+
+        console.log(chalk.green('Complete'));
+
+    // ---------------------------------------
+
+    process.stdout.write(chalk.blue('(4/4)') + ' Coping assets and images: ');
+
+        gulp.src(['./src/assets/img/*.*', './src/assets/img/**/*'])
+            .pipe(copy('./dist/assets/img', { prefix: 3 }));
 
         console.log(chalk.green('Complete'));
 
@@ -96,15 +123,6 @@ gulp.task('build', function() {
 gulp.task('compile', function() {
 
     console.log('\n\n');
-
-    // ---------------------------------------
-
-    process.stdout.write(chalk.blue('(1/2)') + ' Coping assets and images: ');
-
-        gulp.src(['./src/assets/img/*.*', './src/assets/img/**/*'])
-            .pipe(copy('./dist/assets/img', { prefix: 3 }));
-
-        console.log(chalk.green('Complete'));
 
     // ---------------------------------------
 
