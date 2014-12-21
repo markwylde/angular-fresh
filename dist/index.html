@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:ng="http://angularjs.org" id="ng-app">
+
+<head>
+    <meta charset="UTF-8">
+    <title ng-bind="'ngFresh | ' + title">ngFresh</title>
+    <link rel="shortcut icon" href="assets/img/favicon.ico" />
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+
+    <link rel="stylesheet" href="vendor/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.css" />
+    <link rel="stylesheet" href="vendor/ionicons/css/ionicons.css" />
+    <link rel="stylesheet" href="assets/app.min.css" />
+    <script type="text/javascript" src="//use.typekit.net/jyr3dkb.js"></script>
+    <script type="text/javascript">
+    try {
+        Typekit.load();
+    } catch (e) {}
+    </script>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="libraries/html5shiv/html5shiv.js"></script>
+    <script src="libraries/respond/respond.min.js"></script>
+    <![endif]-->
+    <style ng-repeat="style in styles" ng-bind="style.data"></style>
+</head>
+
+<body class="skin-blue">
+
+    <div ng-view></div>
+
+    <script src="vendor/es5-shim/es5-shim.js"></script>
+    <script src="vendor/jquery/dist/jquery.js"></script>
+    <script src="vendor/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="vendor/moment/moment.js"></script>
+    <script src="vendor/underscore/underscore.js"></script>
+    <script src="vendor/angular/angular.js"></script>
+    <script src="vendor/angular-route/angular-route.js"></script>
+    <script src="vendor/angular-resource/angular-resource.js"></script>
+    <script src="vendor/restangular/dist/restangular.js"></script>
+    <script src="vendor/angular-animate/angular-animate.js"></script>
+    <script src="vendor/json3/lib/json3.js"></script>
+
+    <script src="assets/view.min.js"></script>
+
+    <script src="assets/Api.min.js"></script>
+    <script src="assets/Core.min.js"></script>
+
+    <script src="assets/app.min.js"></script>
+
+</body>
+
+</html>
