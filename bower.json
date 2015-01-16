@@ -25,7 +25,8 @@
     "restangular": "~1.4.0",
     "select2": "~3.4.8",
     "underscore": "~1.6.0",
-    "es5-shim": "~4.0.5"
+    "es5-shim": "~4.0.5",
+    "normalize-css": "~3.0.2"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.17",

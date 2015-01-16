@@ -8,13 +8,18 @@ angular.module('app.core', [
         var ___ = 'views/Core/';
 
         $routeProvider
-        .when('/dashboard', {
+        .when('/', {
             title: 'Dashboard',
             controller: 'HomeCtrl',
             templateUrl: ___+ 'home/home.html'
         })
+        .when('/test', {
+            title: 'Test',
+            controller: 'HomeCtrl',
+            templateUrl: ___+ 'home/test.html'
+        })
         .otherwise({
-            redirectTo: '/dashboard'
+            redirectTo: '/'
         });
 
     }
