@@ -8,4 +8,5 @@ var JsonAPI = (function () {
     };
     return JsonAPI;
 })();
-//# sourceMappingURL=apiJson.js.map
+
+//# sourceMappingURL=../../../../../src/modules/Api/library/apiJson/apiJson.js.map

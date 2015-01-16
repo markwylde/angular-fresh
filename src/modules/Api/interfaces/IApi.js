@@ -1,1 +1,3 @@
-//# sourceMappingURL=IApi.js.map
+
+
+//# sourceMappingURL=../../../../src/modules/Api/interfaces/IApi.js.map

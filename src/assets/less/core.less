@@ -1,90 +1,89 @@
-// CORE: General Styles
-
-html, body {
-    margin: 0;
-    padding: 0;
-    font-family: "museo-sans", Arial, sans-serif
+body {
+    padding-top: 20px;
 }
 
-.globalNews {
-    color: white;
-    padding: 2px 2px 2px 5px;
-    font-weight: 100;
-    font-size: 12px;
-    border-bottom: 2px solid #979797;
+.footer {
+    padding-top: 40px;
+    padding-bottom: 40px;
+    margin-top: 40px;
+    border-top: 1px solid #eee;
 }
 
-.tileMenu {
-    padding-left: 5px;
-    padding-top: 5px;
-    cursor: pointer;
+/* Main marketing message and sign up button */
+.jumbotron {
+    text-align: center;
+    background-color: transparent;
+}
+.jumbotron .btn {
+    padding: 14px 24px;
+    font-size: 21px;
+}
 
-    .tile {
+/* Customize the nav-justified links to be fill the entire space of the .navbar */
 
-        > div {
-            position: relative;
-            top: 50%;
-            transform: translate3d(0,-50%,0);
-            -webkit-transform: translate3d(0,-50%,0);
-            -webkit-backface-visibility: hidden;
-        }
+.nav-justified {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.nav-justified > li > a {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 0;
+    font-weight: bold;
+    color: #777;
+    text-align: center;
+    background-color: #e5e5e5; /* Old browsers */
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#e5e5e5));
+    background-image: -webkit-linear-gradient(top, #f5f5f5 0%, #e5e5e5 100%);
+    background-image:      -o-linear-gradient(top, #f5f5f5 0%, #e5e5e5 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, from(top), color-stop(0%, #f5f5f5), to(#e5e5e5));
+    background-image:         linear-gradient(top, #f5f5f5 0%, #e5e5e5 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f5f5', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+    background-repeat: repeat-x; /* Repeat the gradient */
+    border-bottom: 1px solid #d5d5d5;
+}
+.nav-justified > .active > a,
+.nav-justified > .active > a:hover,
+.nav-justified > .active > a:focus {
+    background-color: #ddd;
+    background-image: none;
+    -webkit-box-shadow: inset 0 3px 7px rgba(0,0,0,.15);
+    box-shadow: inset 0 3px 7px rgba(0,0,0,.15);
+}
+.nav-justified > li:first-child > a {
+    border-radius: 5px 5px 0 0;
+}
+.nav-justified > li:last-child > a {
+    border-bottom: 0;
+    border-radius: 0 0 5px 5px;
+}
 
-        float: left;
-        width: calc(25% - 2px);
-        margin: 2px;
-
-        height: 75px;
-        text-align: center;
-        border: 1px solid gray;
-
-        p, small { margin: 0; padding: 0; }
+@media (min-width: 768px) {
+    .nav-justified {
+        max-height: 52px;
+    }
+    .nav-justified > li > a {
+        border-right: 1px solid #d5d5d5;
+        border-left: 1px solid #fff;
+    }
+    .nav-justified > li:first-child > a {
+        border-left: 0;
+        border-radius: 5px 0 0 5px;
+    }
+    .nav-justified > li:last-child > a {
+        border-right: 0;
+        border-radius: 0 5px 5px 0;
     }
 }
 
-.scoreMenu {
-
-    font-size: 13px;
-    font-weight: 100;
-    line-height: 20px;
-    ul, li { padding: 0; margin: 0; }
-    ul {
-        &.title {
-            background-color: black;
-            color: white;
-            padding: 0;
-            li {
-                font-weight: 700;
-            }
-        }
-        &.value {
-            padding: 0 3px 0 3px;
-            font-weight: 500;
-            background-color: white;
-        }
-        &.info {
-            padding: 0 3px 0 3px;
-            font-size: 10px;
-            font-weight: 100;
-            color: gray;
-            background-color: white;
-            border-bottom: 2px solid #979797;
-            margin-top: -6px;
-        }
-
-        li {
-            padding-left: 10px;
-        }
-
-        white-space: nowrap;
-    }
-
-    li {
-        width: 23.2%;
-        display: inline-block;
-        text-align: center;
-        list-style-type: none;
-
-        img { width: 10px; margin-top: -2px; }
-        small { color: red; font-weight: 100; }
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+    /* Remove the padding we set earlier */
+    .masthead,
+    .marketing,
+    .footer {
+        padding-right: 0;
+        padding-left: 0;
     }
 }

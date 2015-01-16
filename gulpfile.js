@@ -10,6 +10,7 @@ var less = require('gulp-less');
 var fs = require('fs');
 var chalk = require('chalk');
 var sourcemaps = require('gulp-sourcemaps');
+var ts = require('gulp-typescript');
 
 function getFolders(dir) {
     return fs.readdirSync(dir)
@@ -41,6 +42,16 @@ gulp.task('build', function() {
     // ---------------------------------------
 
     process.stdout.write(chalk.blue('(1/4)') + ' Compile and build main javascript file: ');
+
+        gulp.src('./src/**/*.ts')
+            .pipe(sourcemaps.init())
+            .pipe(ts({
+                declarationFiles: true,
+                noExternalResolve: true
+            }))
+            .pipe(sourcemaps.write('../src/'))
+            .pipe(gulp.dest('./src/'));
+
 
         gulp.src(['./src/app.js'])
             .pipe(sourcemaps.init())
