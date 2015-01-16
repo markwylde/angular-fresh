@@ -9,14 +9,14 @@ angular.module('app.core', [
 
         $routeProvider
         .when('/', {
-            title: 'Dashboard',
+            title: 'Home',
             controller: 'HomeCtrl',
             templateUrl: ___+ 'home/home.html'
         })
-        .when('/test', {
-            title: 'Test',
+        .when('/news', {
+            title: 'News',
             controller: 'HomeCtrl',
-            templateUrl: ___+ 'home/test.html'
+            templateUrl: ___+ 'home/news.html'
         })
         .otherwise({
             redirectTo: '/'
