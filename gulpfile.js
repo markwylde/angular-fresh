@@ -17,6 +17,7 @@ var exec = require('child_process').exec;
 var findRemoveSync = require('find-remove');
 var ignore = require('gulp-ignore');
 var rimraf = require('gulp-rimraf');
+var gulpif = require('gulp-if');
 
 function getFolders(dir) {
     return fs.readdirSync(dir)
@@ -52,34 +53,18 @@ gulp.task('build', function() {
     console.log(chalk.blue('Building your ngFresh application: '));
     process.stdout.write(chalk.blue('(1/7)') + ' Compiling TypeScript files: ');
 
-        gulp.src('./src/**/*.ts')
-            .pipe(sourcemaps.init())
-            .pipe(ts({
-                declarationFiles: true,
-                noExternalResolve: true
-            }))
-            .on('error', function(error) {
-                //console.log("\007");
-                exec('afplay /System/Library/Sounds/Hero.aiff');
-            })
-            .pipe(rename(function(path) {
-                path.extname = ".tmp.js"
-            }))
-            .pipe(sourcemaps.write('../src/'))
-            .pipe(gulp.dest('./src/'))
-            .on('finish', function() {
-                console.log(chalk.green('Complete'));
-                process.stdout.write(chalk.blue('(2/7)') + ' Compile and build generic javascript files: ');
+            console.log(chalk.green('Complete'));
+            process.stdout.write(chalk.blue('(2/7)') + ' Compile and build generic javascript files: ');
 
-                gulp.src(['./src/app.js'])
-                    .pipe(sourcemaps.init())
-                    .pipe(concat('app.js'))
-                    .pipe(uglify())
-                    .pipe(rename(function(path) {
-                        path.extname = '.min.js';
-                    }))
-                    .pipe(sourcemaps.write('../assets', {sourceRoot: '/src/'}))
-                    .pipe(gulp.dest('./dist/assets'))
+            gulp.src(['./src/app.js'])
+                .pipe(sourcemaps.init())
+                .pipe(concat('app.js'))
+                .pipe(uglify())
+                .pipe(rename(function(path) {
+                    path.extname = '.min.js';
+                }))
+                .pipe(sourcemaps.write('../assets', {sourceRoot: '/src/'}))
+                .pipe(gulp.dest('./dist/assets'))
 
             .on('finish', function() {
 
@@ -93,22 +78,39 @@ gulp.task('build', function() {
                     .pipe(sourcemaps.write('../assets', {sourceRoot: '/src/assets/js/'}))
                     .pipe(gulp.dest('./dist/assets'))
 
+                gulp.src(['./src/assets/js/source-map.js'])
+                    .pipe(sourcemaps.init())
+                    .pipe(concat('source-map.js'))
+                    .pipe(uglify())
+                    .pipe(rename(function(path) {
+                        path.extname = '.min.js';
+                    }))
+                    .pipe(sourcemaps.write('../assets', {sourceRoot: '/src/assets/js/'}))
+                    .pipe(gulp.dest('./dist/assets'))
+
             .on('finish', function() {
                 console.log(chalk.green('Complete'));
                 process.stdout.write(chalk.blue('(3/7)') + ' Compile and build the individual modules javascript: ');
 
-                var folders = getFolders('./src/modules/');
+                 var folders = getFolders('./src/modules/');
                 var foldersPending = 0;
                 var tasks = folders.map(function(folder) {
                     foldersPending = foldersPending + 1;
-                    gulp.src('./src/modules/' + folder + '/**/*.js')
-                        .pipe(sourcemaps.init())
+                    gulp.src('./src/modules/' + folder + '/**/*.{js,ts}', {base:'src'})
+                        .pipe(sourcemaps.init({debug: true}))
+
+                        .pipe(gulpif( /(.+?)\.ts/, ts({
+                            declarationFiles: true,
+                            noExternalResolve: true,
+                            sourceRoot: 'modules/' + folder + '/',
+                            base: '../../'
+                        })) )
                         .pipe(concat(folder + '.js'))
-                        //.pipe(uglify())
+                        .pipe(uglify())
                         .pipe(rename(function(path) {
                             path.extname = '.min.js';
                         }))
-                        .pipe(sourcemaps.write('../assets', {sourceRoot: '/src/modules/' + folder}))
+                        .pipe(sourcemaps.write('../assets', {sourceRoot: '../src/'}))
                         .pipe(gulp.dest('./dist/assets/'))
 
             .on('finish', function() {
@@ -127,13 +129,13 @@ gulp.task('build', function() {
                 process.stdout.write(chalk.blue('(5/7)') + ' Build the css files from less: ');
 
                 gulp.src('./src/assets/less/app.less')
-                    .pipe(sourcemaps.init())
+                    .pipe(sourcemaps.init({ debug: true }))
                     .pipe(less())
                     .pipe(cssmin())
                     .pipe(rename(function(path) {
                         path.extname = '.min.css';
                     }))
-                    .pipe(sourcemaps.write('../assets'))
+                    .pipe(sourcemaps.write('../assets', {sourceRoot: '/src/assets/less'}))
                     .pipe(gulp.dest('./dist/assets'))
 
             .on('finish', function() {
@@ -148,8 +150,7 @@ gulp.task('build', function() {
 
                 console.log(chalk.green('Complete'));
                 process.stdout.write(chalk.blue('(7/7)') + ' Cleaning temporary files: ');
-
-                  gulp.src('./src/**/*.tmp.js*', { read: false }) // much faster
+                  gulp.src('./src/**/*.temporarymp.js*', { read: false }) 
                     .pipe(rimraf())
 
             .on('finish', function() {;
@@ -159,7 +160,6 @@ gulp.task('build', function() {
             });
             });
             }
-            });
             });
             });
             });
