@@ -2,21 +2,16 @@ var gulp = require('gulp');
 var path = require('path');
 var watch = require('gulp-watch');
 var uglify = require('gulp-uglify');
-var concat = require('gulp-concat');
 var rename = require('gulp-rename');
-var clean = require('gulp-clean');
 var copy = require('gulp-copy');
+var concat = require('gulp-concat');
 var cssmin = require('gulp-cssmin');
 var less = require('gulp-less');
 var fs = require('fs');
 var chalk = require('chalk');
-var runSequence = require('run-sequence');
 var sourcemaps = require('gulp-sourcemaps');
 var ts = require('gulp-typescript');
 var exec = require('child_process').exec;
-var findRemoveSync = require('find-remove');
-var ignore = require('gulp-ignore');
-var rimraf = require('gulp-rimraf');
 var gulpif = require('gulp-if');
 
 function getFolders(dir) {
@@ -110,7 +105,7 @@ gulp.task('build', function() {
                         .pipe(rename(function(path) {
                             path.extname = '.min.js';
                         }))
-                        .pipe(sourcemaps.write('../assets', {sourceRoot: '../src/'}))
+                        .pipe(sourcemaps.write('../assets', {sourceRoot: '/src'}))
                         .pipe(gulp.dest('./dist/assets/'))
 
             .on('finish', function() {
@@ -149,13 +144,7 @@ gulp.task('build', function() {
             .on('end', function() {
 
                 console.log(chalk.green('Complete'));
-                process.stdout.write(chalk.blue('(7/7)') + ' Cleaning temporary files: ');
-                  gulp.src('./src/**/*.temporarymp.js*', { read: false }) 
-                    .pipe(rimraf())
 
-            .on('finish', function() {;
-                console.log(chalk.green('Complete'));
-            });
             });
             });
             });
