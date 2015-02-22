@@ -13,6 +13,9 @@ var sourcemaps = require('gulp-sourcemaps');
 var ts = require('gulp-typescript');
 var exec = require('child_process').exec;
 var gulpif = require('gulp-if');
+var jslint = require('gulp-jslint');
+
+var globals = ['angular'];
 
 function getFolders(dir) {
     return fs.readdirSync(dir)
@@ -85,7 +88,7 @@ gulp.task('build', function() {
 
             .on('finish', function() {
                 console.log(chalk.green('Complete'));
-                process.stdout.write(chalk.blue('(3/7)') + ' Compile and build the individual modules javascript: ');
+                process.stdout.write(chalk.blue('(3/7)') + ' Compile and build the individual modules javascript: \n');
 
                  var folders = getFolders('./src/modules/');
                 var foldersPending = 0;
@@ -93,6 +96,17 @@ gulp.task('build', function() {
                     foldersPending = foldersPending + 1;
                     gulp.src('./src/modules/' + folder + '/**/*.{js,ts}', {base:'src'})
                         .pipe(sourcemaps.init({debug: true}))
+
+                        .pipe(gulpif( /(.+?)\.js/,
+                            jslint({
+                                node: true,
+                                evil: true,
+                                nomen: true,
+                                global: globals,
+                                predef: globals,
+                                errorsOnly: false
+                            })
+                        ))
 
                         .pipe(gulpif( /(.+?)\.ts/, ts({
                             declarationFiles: true,

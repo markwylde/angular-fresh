@@ -1,8 +1,9 @@
+"use strict";
+
 angular.module('app.core')
 
-.filter('split', function() {
-    return function(input, splitChar, splitIndex) {
-        // do some bounds checking here to ensure it has that index
-        return input.split(splitChar)[splitIndex];
-    }
-});
+    .filter('split', function () {
+        return function (input, splitChar, splitIndex) {
+            return input.split(splitChar)[splitIndex];
+        };
+    });
