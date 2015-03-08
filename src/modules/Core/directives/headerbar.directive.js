@@ -1,9 +1,7 @@
-"use strict";
-
 angular.module('app.core')
 
     .directive('headerBar', [
-        function () {
+        function() {
             return {
                 scope: {
                     selected: '@'

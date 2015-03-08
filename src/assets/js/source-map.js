@@ -1,3 +1,5 @@
+//jscs:disable
+/* jshint ignore:start */
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors

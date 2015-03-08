@@ -1,2 +1,0 @@
-// GLOBALS
-var globalConfig = {};

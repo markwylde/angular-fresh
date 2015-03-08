@@ -1,11 +1,9 @@
-"use strict";
-
 angular.module('app.core', [
     'ngRoute'
 ])
 
     .config(['$routeProvider',
-        function ($routeProvider) {
+        function($routeProvider) {
 
             var ___ = 'views/Core/';
 
