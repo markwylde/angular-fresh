@@ -13,10 +13,9 @@ $.ajax({
 
 // BOOT MODULE
 angular.module('app', [
-    /* [BEGIN INJECT: MODULES] */
     'app.api',
     'app.core',
-    /* [END INJECT: MODULES] */
+
     'ngAnimate',
     'ngRoute',
     'ngResource',
