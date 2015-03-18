@@ -1,6 +1,5 @@
 /*global _*/
 
-var exceptions = 0;
 // CONFIGURATION
 $.ajax({
     url: 'configuration.json',
@@ -35,8 +34,6 @@ angular.module('app', [
     function($log, $window, $injector) {
 
         var getSourceMappedStackTrace = function(exception) {
-
-            exceptions = exceptions + 1;
 
             var $q = $injector.get('$q');
             var $http = $injector.get('$http');
