@@ -1,6 +1,11 @@
 # angular-fresh
 A fresh boilerplate to create a modular AngularJS project. Use angular-fresh for your project and you will get an out of the box modular and integratable pattern using Angular and Bootstrap that's ready to hook into your REST/API based server.
 
+![alt text][logo]
+
+[logo]: http://s29.postimg.org/r9h9ximwn/Angular_Fresh_1_0_1_Screenshot.png "AngularFresh Screenshot"
+
+
 ## How to install
 ##### 1) Checkout into a web folder
     git clone https://github.com/markwylde/angular-fresh.git
