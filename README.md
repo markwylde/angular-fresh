@@ -1,7 +1,7 @@
 # ng-fresh
 A fresh boilerplate to create a modular AngularJS project. 
 
-#### How to install
+## How to install
 ##### 1) Checkout into a web folder
     git clone https://github.com/markwylde/ng-fresh.git
 
