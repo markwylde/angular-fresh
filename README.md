@@ -1,12 +1,12 @@
-# ng-fresh
-A fresh boilerplate to create a modular AngularJS project. Use ng-fresh for your project and you will get an out of the box modular and integratable pattern using Angular and Bootstrap that's ready to hook into your REST/API based server.
+# angular-fresh
+A fresh boilerplate to create a modular AngularJS project. Use angular-fresh for your project and you will get an out of the box modular and integratable pattern using Angular and Bootstrap that's ready to hook into your REST/API based server.
 
 ## How to install
 ##### 1) Checkout into a web folder
-    git clone https://github.com/markwylde/ng-fresh.git
+    git clone https://github.com/markwylde/angular-fresh.git
 
 ##### 2) Navigate to the dist folder
-	http://localhost/ng-fresh/dist/
+	http://localhost/angular-fresh/dist/
 
 ## Making changes
 When developing your project you should run gulp in the background. Gulp has three main tasks:
@@ -59,7 +59,7 @@ Since file structure is largely opinion based you can move the files around in a
 Both of these approaches will compile and work as expected without changing any configurable options.
 
 ## Features
-Out of the box ng-fresh comes with the following features:
+Out of the box angular-fresh comes with the following features:
 
  - IE8 compatable
  - Bootstrap enabled
