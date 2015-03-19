@@ -58,7 +58,7 @@ gulp.task('build', function() {
     console.log('\n\n');
     // ---------------------------------------
 
-    console.log(chalk.blue('Building your ngFresh application: '));
+    console.log(chalk.blue('Building your Angular Fresh application: '));
     console.log(chalk.yellow('Started at '), '[ ' + chalk.gray(new Date()) + ' ]');
 
     Q.fcall(CleanUpPrevious)
@@ -81,7 +81,7 @@ gulp.task('build-no-validation', function() {
     console.log('\n\n');
     // ---------------------------------------
 
-    console.log(chalk.blue('Building your ngFresh application: '));
+    console.log(chalk.blue('Building your Angular Fresh application: '));
     console.log(chalk.yellow('Started at '), '[ ' + chalk.gray(new Date()) + ' ]');
 
     Q.fcall(CleanUpPrevious)
