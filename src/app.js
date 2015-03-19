@@ -19,7 +19,7 @@ angular.module('app', [
     'ngAnimate',
     'ngRoute',
     'ngResource',
-    'ngSourceMap'
+    'angular-sourcemaps'
 ])
 
 .config(['$locationProvider',

@@ -24,7 +24,7 @@
     "jquery": "~1.11.1",
     "moment": "~2.6.0",
     "normalize-css": "~3.0.2",
-    "ng-sourcemaps": "https://github.com/markwylde/angular-sourcemaps.git",
+    "angular-sourcemaps": "https://github.com/markwylde/angular-sourcemaps.git",
     "q": "~1.1.0",
     "respond": "~1.4.2",
     "underscore": "~1.6.0"
