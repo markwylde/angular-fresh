@@ -1,5 +1,5 @@
 # ng-fresh
-A fresh boilerplate to create a modular AngularJS project. 
+A fresh boilerplate to create a modular AngularJS project. Use ng-fresh for your project and you will get an out of the box modular and integratable pattern using Angular and Bootstrap that's ready to hook into your REST/API based server.
 
 ## How to install
 ##### 1) Checkout into a web folder
