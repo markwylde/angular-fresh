@@ -1,12 +1,12 @@
-describe("hello-protractor", function() {
+describe('hello-protractor', function() {
 
     var ptor = protractor.getInstance();
 
-    describe("index", function() {
+    describe('index', function() {
 
-        it("should display the correct title", function() {
+        it('should display the correct title', function() {
             ptor.get('./#');
-            expect(ptor.getTitle()).toBe("Campaign Manager | Dashboard");
+            expect(ptor.getTitle()).toBe('Campaign Manager | Dashboard');
         });
 
     });

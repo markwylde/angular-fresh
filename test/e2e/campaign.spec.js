@@ -1,15 +1,15 @@
-describe("campaigns", function() {
+describe('campaigns', function() {
 
     var newCampaignId;
 
-    it("should have the correct window title", function() {
+    it('should have the correct window title', function() {
 
         browser.get('./#/campaign/create');
-        expect(browser.getTitle()).toBe("Campaign Manager | Create a new campaign");
+        expect(browser.getTitle()).toBe('Campaign Manager | Create a new campaign');
 
     });
 
-    it("should POST a new campaign", function() {
+    it('should POST a new campaign', function() {
 
         browser.findElement(protractor.By.model('campaign.name')).sendKeys('PTOR: Test Campaign Step 1');
 
@@ -26,8 +26,8 @@ describe("campaigns", function() {
 
     });
 
-    it("should GET and PUT the new campaign", function() {
-        console.log("Editing: ./#/campaign/update/" + newCampaignId);
+    it('should GET and PUT the new campaign', function() {
+        console.log('Editing: ./#/campaign/update/' + newCampaignId);
 
         browser.get('./#/campaign/update/' + newCampaignId);
 
@@ -45,7 +45,7 @@ describe("campaigns", function() {
         });
     });
 
-    it("should DELETE the new campaign", function() {
+    it('should DELETE the new campaign', function() {
 
         browser.get('./#/campaign/list');
 

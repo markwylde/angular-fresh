@@ -2,7 +2,7 @@
 <html xmlns:ng="http://angularjs.org" id="ng-app">
 
 <head>
-    <base href="/gad/dist/">
+    <base href="/">
 
     <meta charset="UTF-8">
     <title ng-bind="'Angular Fresh | ' + title">Angular Fresh</title>
@@ -15,30 +15,29 @@
     <link rel="stylesheet" href="vendor/ionicons/css/ionicons.css" />
     <link rel="stylesheet" href="assets/app_core.min.css" />
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
+    <!--[if lte IE 9]>
     <script src="vendor/html5shiv/dist/html5shiv.js"></script>
     <script src="vendor/respond/dest/respond.min.js"></script>
+    <script src="vendor/es5-shim/es5-shim.js"></script>
+    <script src="vendor/json3/lib/json3.js"></script>
     <![endif]-->
-    <style ng-repeat="style in styles" ng-bind="style.data"></style>
 </head>
 
-<body class="skin-blue">
+<body>
 
     <div ng-view></div>
 
     <script src="vendor/jquery/dist/jquery.js"></script>
+    <script src="vendor/q/q.js"></script>
     <script src="vendor/bootstrap/dist/js/bootstrap.js"></script>
 
     <script src="vendor/angular/angular.js"></script>
     <script src="vendor/angular-route/angular-route.js"></script>
     <script src="vendor/angular-resource/angular-resource.js"></script>
     <script src="vendor/angular-animate/angular-animate.js"></script>
-    <script src="vendor/es5-shim/es5-shim.js"></script>
-    <script src="vendor/json3/lib/json3.js"></script>
-    <script src="vendor/moment/moment.js"></script>
     <script src="vendor/angular-sourcemaps/dist/angular-sourcemaps.min.js"></script>
     <script src="vendor/angular-sourcemaps/dist/source-map.min.js"></script>
+    <script src="vendor/moment/moment.js"></script>
     <script src="vendor/underscore/underscore.js"></script>
 
     <script src="assets/app_core.min.js"></script>
