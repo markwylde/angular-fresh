@@ -348,7 +348,7 @@ var CopyViews = function() {
         foldersPending = foldersPending + 1;
 
         gulp.src('./src/modules/' + folder + '/**/*.html')
-            .pipe(copy('./dist/modules/' + folder + '/', { prefix: 4 }))
+            .pipe(copy('./dist/modules/' + folder + '/', { prefix: 3 }))
 
         .on('end', function() {
             foldersPending = foldersPending - 1;
