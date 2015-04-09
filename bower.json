@@ -25,9 +25,11 @@
     "moment": "~2.6.0",
     "normalize-css": "~3.0.2",
     "angular-sourcemaps": "https://github.com/markwylde/angular-sourcemaps.git",
+    "typescript-compile": "https://github.com/markwylde/typescript-compile.git",
     "q": "~1.1.0",
     "respond": "~1.4.2",
-    "underscore": "~1.6.0"
+    "underscore": "~1.6.0",
+    "less": "~2.5.0"
   },
   "devDependencies": {
     "angular-mocks": "~1.3.14",

@@ -5,7 +5,7 @@ angular.module('app.core', [
     .config(['$routeProvider',
         function($routeProvider) {
 
-            var ___ = 'views/Core/';
+            var ___ = 'modules/Core/views/';
 
             $routeProvider
                 .when('/', {

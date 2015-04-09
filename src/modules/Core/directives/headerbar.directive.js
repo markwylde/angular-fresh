@@ -6,7 +6,7 @@ angular.module('app.core')
                 scope: {
                     selected: '@'
                 },
-                templateUrl: 'views/Core/partials/headerbar.html'
+                templateUrl: 'modules/Core/views/partials/headerbar.html'
             };
         }
     ]);

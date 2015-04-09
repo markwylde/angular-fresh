@@ -1,5 +1,5 @@
 {
-  "name": "Angular Fresh",
+  "name": "angular-fresh",
   "version": "1.0.1",
   "author_name": "Mark Wylde",
   "author_email": "mark.wylde@verl.com",
@@ -11,6 +11,8 @@
     "chalk": "^0.5.1",
     "chromedriver": "^2.10.0",
     "del": "^1.1.1",
+    "express": "^4.12.3",
+    "findit": "^2.0.0",
     "gulp": "^3.8.10",
     "gulp-concat": "^2.5.2",
     "gulp-copy": "0.0.2",
@@ -35,7 +37,8 @@
     "karma-phantomjs-launcher": "~0.1.4",
     "protractor": "^1.7.0",
     "q": "^1.2.0",
-    "run-sequence": "^1.0.2"
+    "run-sequence": "^1.0.2",
+    "watch": "^0.16.0"
   },
   "scripts": {
     "install": "./node_modules/protractor/bin/webdriver-manager update",

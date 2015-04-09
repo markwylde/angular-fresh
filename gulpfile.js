@@ -1,8 +1,7 @@
-/* globals require */
+/* globals require, process */
 
 var gulp = require('gulp');
 var path = require('path');
-var watch = require('gulp-watch');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var copy = require('gulp-copy');
@@ -13,19 +12,17 @@ var fs = require('fs');
 var chalk = require('chalk');
 var sourcemaps = require('gulp-sourcemaps');
 var ts = require('gulp-typescript');
-var exec = require('child_process').exec;
 var gulpif = require('gulp-if');
 var jshint = require('gulp-jshint');
-var stylish = require('jshint-stylish');
 var jscs = require('gulp-jscs');
 var concat = require('gulp-concat');
 var order = require('gulp-order');
 var del = require('del');
 var Q = require('q');
-var htmlhint = require('gulp-htmlhint');
-var w3cjs = require('gulp-w3cjs');
+//var htmlhint = require('gulp-htmlhint');
+//var w3cjs = require('gulp-w3cjs');
 
-var globals = ['angular'];
+//var globals = ['angular'];
 
 function getFolders(dir) {
     return fs.readdirSync(dir)
@@ -36,22 +33,123 @@ function getFolders(dir) {
 
 gulp.task('default', function() {
     console.log('\n\n');
-    console.log(chalk.cyan('Three tasks are available for this gulp:\n'));
-    console.log('watch: will watch for any changes then rebuild');
-    console.log('build: will do a build and minify of all less and js files');
-    console.log('compile: will do a complete build and copy all libraries in a production ready state');
+    console.log(chalk.cyan('Two tasks are available for this gulp:\n'));
+    console.log('dev: will start a local webserver from the src folder');
+    console.log('build: will compile the dist folder ready for production');
     console.log('\n');
 });
 
-gulp.task('watch', function() {
-    console.log('\n\nWatching the src file for changes...');
-    var watcher = gulp.watch([
-            './src/**/*',
-            '!./**/*.tmp*'], ['build']);
-    watcher.on('change', function(event) {
-        console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+gulp.task('dev', function() {
+
+    // Cache the distributions index file as a base
+    var indexFileData;
+    var fs = require('fs');
+    fs.readFile('./dist/index.html', 'utf8', function(err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        indexFileData = data;
     });
-    console.log('\n');
+
+    // START EXPRESS SERVER
+    var express = require('express');
+    express.static.mime.define({'text/javascript': ['ts']});
+
+    var app = express();
+
+    app.use('/vendor', express.static('./bower_components'));
+    app.use(express.static('./src'));
+
+    app.get('/', function(req, res) {
+
+
+        // STEP 1) Find what JS and TS files are in src
+        var files = {
+            javascript: [],
+            typescript: []
+        };
+
+        var finder = require('findit')('./src');
+
+        finder.on('file', function(file) {
+            if (file.substr(-3) === '.js') {
+                files.javascript.push(file);
+            } else if (file.substr(-3) === '.ts') {
+                files.typescript.push(file);
+            }
+        });
+
+        finder.on('end', function(file) {
+
+            // STEP 2) Now we have the script file list organise it
+            // Note: The load order is somewhat important. You must
+            // load the app.js file first, and then each module.js,
+            // but after that, the load order should not matter
+
+            var xprtScripts = '';
+
+            // 2.1) Lets find what modules we have:
+            function getDirectories(srcpath) {
+                var path = require('path');
+                return fs.readdirSync(srcpath).filter(function(file) {
+                    return fs.statSync(path.join(srcpath, file)).isDirectory();
+                });
+            }
+            var modules = getDirectories('./src/modules');
+
+            // 2.2) Now lets push those module.js files to the top
+            var index;
+            for (var module in modules) {
+                index = files.javascript.indexOf('src/modules/' + modules[module] + '/module.js');
+
+                if (index > -1) {
+                    files.javascript.splice(index, 1);
+                }
+
+                xprtScripts = xprtScripts + '\n<script type="text/javascript" src="modules/' + modules[module] + '/module.js"></script>';
+            }
+
+            // 2.3) app.js should be the first loaded, so lets bump that to the top
+            index = files.javascript.indexOf('src/app.js');
+
+            if (index > -1) {
+                files.javascript.splice(index, 1);
+            }
+
+            xprtScripts = '\n<script type="text/javascript" src="app.js"></script>' + xprtScripts;
+
+            // STEP 3) Lets generate the list of scripts to send to the browser
+            for (file in files.javascript) {
+                xprtScripts = xprtScripts + '\n<script type="text/javascript" src="' + files.javascript[file].substr(4) + '"></script>';
+            }
+            for (file in files.typescript) {
+                xprtScripts = xprtScripts + '\n<script type="text/typescript" src="' + files.typescript[file].substr(4) + '"></script>';
+            }
+            xprtScripts = '\n<script src="vendor/less/dist/less.min.js"></script>' + xprtScripts;
+            xprtScripts = xprtScripts + '\n<script src="vendor/typescript-compile/js/typescript.min.js"></script>';
+            xprtScripts = xprtScripts + '\n<script src="vendor/typescript-compile/js/typescript.compile.min.js"></script>';
+
+            // STEP 4) Replace the styles and scripts from the production index
+            // file with the newly generated ones
+            var tmpIndexFileData = indexFileData;
+            tmpIndexFileData = tmpIndexFileData.replace('<script src="assets/app_core.min.js"></script>', xprtScripts);
+            tmpIndexFileData = tmpIndexFileData.replace('<link rel="stylesheet" href="assets/app_core.min.css" />',
+                '<link rel="stylesheet/less" type="text/css" href="assets/less/app.less" />');
+
+            // Finally...
+            res.send(tmpIndexFileData);
+        });
+    });
+
+    var server = app.listen(3000, function() {
+
+        var host = server.address().address;
+        var port = server.address().port;
+
+        console.log('Example app listening at http://%s:%s', host, port);
+
+    });
+
 });
 
 gulp.task('build', function() {
@@ -70,6 +168,7 @@ gulp.task('build', function() {
      .then(BuildLess)
      .then(CopyAssets)
      .then(ConcatJavascript)
+     .then(CopyVendor)
      .then(CleanUpTemp)
      .then(function() {
          console.log(chalk.yellow('Finished at '), '[ ' + chalk.gray(new Date()) + ' ]');
@@ -100,27 +199,11 @@ gulp.task('build-no-validation', function() {
 
 });
 
-gulp.task('compile', function() {
-
-    console.log('\n\n');
-
-    process.stdout.write(chalk.blue('(2/2)') + ' Coping libraries to vendor: ');
-
-    gulp.src(['./bower_components/**/*'])
-        .pipe(copy('./dist/vendor', { prefix: 1 }));
-
-    console.log(chalk.green('Complete'));
-
-    console.log('\n');
-
-});
-
-
 // STEP 1: ---------------------------------------
 var CleanUpPrevious = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(1/10)') + ' Deleting previous compiled files: ');
+    process.stdout.write(chalk.blue('(1/11)') + ' Deleting previous compiled files: ');
     del([
         'dist/assets/**/*',
         'dist/views/**/*'
@@ -133,14 +216,14 @@ var CleanUpPrevious = function() {
     });
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------
 
 // STEP 2: ---------------------------------------
 var CompileJavaScript = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(2/10)') + ' Compile and build generic javascript files: ');
+    process.stdout.write(chalk.blue('(2/11)') + ' Compile and build generic javascript files: ');
 
     gulp.src(['./src/app.js'])
         .pipe(sourcemaps.init())
@@ -161,14 +244,14 @@ var CompileJavaScript = function() {
     });
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------
 
 // STEP 3: ---------------------------------------
 var TestValidJavascript = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(3/10)') + ' Testing all JavaScript code is valid: ');
+    process.stdout.write(chalk.blue('(3/11)') + ' Testing all JavaScript code is valid: ');
 
     gulp.src('./src/**/*.js')
         .pipe(jscs())
@@ -185,40 +268,40 @@ var TestValidJavascript = function() {
     });
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------
 
 // STEP 5: ---------------------------------------
 var TestValidHTML = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(4/10)') + ' Testing all HTML code is valid: ');
+    process.stdout.write(chalk.blue('(4/11)') + ' Testing all HTML code is valid: ');
 
     //gulp.src('./src/**/*.html')
     //    .pipe(w3cjs())
     //    .pipe(w3cjs.reporter('fail'))
 
     //.on('finish', function() {
-        console.log(chalk.yellow('Skipped'));
-        deferred.resolve(true);
+    console.log(chalk.yellow('Skipped'));
+    deferred.resolve(true);
     //}, function() {
     //    deferred.reject(true);
     //    console.log(chalk.red('Failed'));
     //});
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------
 
 // STEP 5: ---------------------------------------
 var CompileModules = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(5/10)') + ' Compiling individual application modules: ');
+    process.stdout.write(chalk.blue('(5/11)') + ' Compiling individual application modules: ');
 
     var folders = getFolders('./src/modules/');
     var foldersPending = 0;
-    var tasks = folders.map(function(folder) {
+    folders.map(function(folder) {
         foldersPending = foldersPending + 1;
         gulp.src('./src/modules/' + folder + '/**/*.{js,ts}', {base:'src'})
             .pipe(sourcemaps.init({debug: true}))
@@ -238,7 +321,7 @@ var CompileModules = function() {
 
         .on('finish', function() {
             foldersPending = foldersPending - 1;
-            if (foldersPending == 0) {
+            if (foldersPending === 0) {
                 finished();
             }
         });
@@ -247,29 +330,29 @@ var CompileModules = function() {
     function finished() {
         deferred.resolve(true);
         console.log(chalk.green('Complete'));
-    };
+    }
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------
 
 // STEP 6: ---------------------------------------
 var CopyViews = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(6/10)') + ' Copying the individual module views: ');
+    process.stdout.write(chalk.blue('(6/11)') + ' Copying the individual module views: ');
 
     var folders = getFolders('./src/modules/');
     var foldersPending = 0;
-    var tasks = folders.map(function(folder) {
+    folders.map(function(folder) {
         foldersPending = foldersPending + 1;
 
-        gulp.src('./src/modules/' + folder + '/views/**/*')
-            .pipe(copy('./dist/views/' + folder + '/', { prefix: 4 }))
+        gulp.src('./src/modules/' + folder + '/**/*.html')
+            .pipe(copy('./dist/modules/' + folder + '/', { prefix: 4 }))
 
         .on('end', function() {
             foldersPending = foldersPending - 1;
-            if (foldersPending == 0) {
+            if (foldersPending === 0) {
                 finished();
             }
         });
@@ -278,17 +361,17 @@ var CopyViews = function() {
     function finished() {
         deferred.resolve(true);
         console.log(chalk.green('Complete'));
-    };
+    }
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------
 
 // STEP 7: ---------------------------------------
 var BuildLess = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(7/10)') + ' Building the LESS style files: ');
+    process.stdout.write(chalk.blue('(7/11)') + ' Building the LESS style files: ');
 
     gulp.src('./src/assets/less/app.less')
         .pipe(less())
@@ -308,14 +391,14 @@ var BuildLess = function() {
     });
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------
 
 // STEP 8: ---------------------------------------
 var CopyAssets = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(8/10)') + ' Copy the image assets to dist: ');
+    process.stdout.write(chalk.blue('(8/11)') + ' Copy the image assets to dist: ');
 
     gulp.src(['./src/assets/img/*.*', './src/assets/img/**/*'])
         .pipe(copy('./dist/assets/img', { prefix: 3 }))
@@ -329,14 +412,14 @@ var CopyAssets = function() {
     });
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------
 
 // STEP 9: ---------------------------------------
 var ConcatJavascript = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(9/10)') + ' Merging the modules and javascript code: ');
+    process.stdout.write(chalk.blue('(9/11)') + ' Merging the modules and javascript code: ');
 
     gulp.src('./dist/assets/*.js')
         .pipe(order([
@@ -358,14 +441,35 @@ var ConcatJavascript = function() {
     });
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------
 
 // STEP 10: ---------------------------------------
+var CopyVendor = function() {
+    var deferred = Q.defer();
+
+    process.stdout.write(chalk.blue('(10/11)') + ' Coping libraries to vendor: ');
+
+    gulp.src(['./bower_components/**/*'])
+        .pipe(copy('./dist/vendor', { prefix: 1 }))
+
+    .on('end', function() {
+        deferred.resolve(true);
+        console.log(chalk.green('Complete'));
+    }, function() {
+        deferred.reject(true);
+        console.log(chalk.red('Failed'));
+    });
+
+    return deferred.promise;
+};
+// -----------------------------------------------
+
+// STEP 11: ---------------------------------------
 var CleanUpTemp = function() {
     var deferred = Q.defer();
 
-    process.stdout.write(chalk.blue('(10/10)') + ' Removing the temporary compilation files: ');
+    process.stdout.write(chalk.blue('(11/11)') + ' Removing the temporary compilation files: ');
 
     del([
         'dist/assets/*.js',
@@ -381,5 +485,5 @@ var CleanUpTemp = function() {
     });
 
     return deferred.promise;
-}
+};
 // -----------------------------------------------

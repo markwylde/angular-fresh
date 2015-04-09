@@ -16,12 +16,10 @@ A fresh boilerplate to create a modular AngularJS project. Use angular-fresh for
 ## Making changes
 When developing your project you should run gulp in the background. Gulp has three main tasks:
 
- 1. **gulp watch**
-	Watches for changes in the **src** folder then builds
+ 1. **gulp dev**
+	Starts a local webserver from the src folder
  2. **gulp build**
-	Builds the JavaScript, TypeScript and CSS files
- 3. **gulp compile**
-   Copys the assets and vendor files over to dist
+	Builds the JavaScript, TypeScript and CSS files into the dist folder ready for production
 
 ## Activating modules
 When building your project try and split it up into separate reusable apps and put them in the **./modules** folder.
