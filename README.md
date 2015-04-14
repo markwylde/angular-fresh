@@ -17,6 +17,7 @@ A fresh boilerplate to create a modular AngularJS project. Use angular-fresh for
     gulp dev
 
 Then browse to 
+    
     http://localhost:3000/
 
 ## Making changes
