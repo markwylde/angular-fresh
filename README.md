@@ -16,7 +16,8 @@ A fresh boilerplate to create a modular AngularJS project. Use angular-fresh for
 ##### 3) To run the dev mode with live editing
     gulp dev
 
-Then browse to http://localhost:3000/
+Then browse to 
+    http://localhost:3000/
 
 ## Making changes
 When developing your project you should run gulp in the background. Gulp has three main tasks:
