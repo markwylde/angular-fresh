@@ -3,7 +3,8 @@ $.ajax({
     url: 'configuration.json',
     type: 'get',
     dataType: 'json'
-}).then(function() {
+}).then(function(data) {
+    window.globalConfig = data;
     angular.element(document).ready(function() {
         angular.bootstrap(document, ['app']);
     });
@@ -22,8 +23,11 @@ angular.module('app', [
     'angular-sourcemaps'
 ])
 
-.config(['$locationProvider',
-    function($locationProvider) {
+.config(['$locationProvider', function($locationProvider) {
         $locationProvider.html5Mode(true).hashPrefix('!');
     }
-]);
+])
+
+.run(['$rootScope', function($rootScope) {
+    $rootScope.globalConfig = window.globalConfig;
+}]);

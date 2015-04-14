@@ -1,4 +1,4 @@
-/* globals require, process */
+/* globals require, process,  __dirname */
 
 var gulp = require('gulp');
 var path = require('path');
@@ -41,14 +41,35 @@ gulp.task('default', function() {
 
 gulp.task('dev', function() {
 
+    var liveReloadEnabled;
+
     // Cache the distributions index file as a base
     var indexFileData;
+    var appJsData;
     var fs = require('fs');
     fs.readFile('./dist/index.html', 'utf8', function(err, data) {
         if (err) {
             return console.log(err);
         }
         indexFileData = data;
+    });
+    fs.readFile('./src/app.js', 'utf8', function(err, data) {
+        if (err) {
+            return console.log(err);
+        }
+
+        data = data + '\n' + 'angular.module(\'app\') ';
+        data = data + '\n' + '.run([\'$templateCache\', \'$route\', ';
+        data = data + '\n' + 'function($templateCache, $route) { ';
+        data = data + '\n' + '    var socket = window.io(); ';
+        data = data + '\n' + '    socket.on(\'cache-change\', function(msg) { ';
+        data = data + '\n' + '        console.info(\'cache-change: \', msg); ';
+        data = data + '\n' + '        $templateCache.remove(msg.file); ';
+        data = data + '\n' + '        $route.reload(); ';
+        data = data + '\n' + '    }); ';
+        data = data + '\n' + '}]); ';
+
+        appJsData = data;
     });
 
     // START EXPRESS SERVER
@@ -57,12 +78,23 @@ gulp.task('dev', function() {
 
     var app = express();
 
+    app.get('/app.js', function(req, res) {
+        res.send(appJsData);
+    });
+
     app.use('/vendor', express.static('./bower_components'));
+    app.use('/bower_components', express.static('./bower_components'));
     app.use(express.static('./src'));
 
     app.get('/', function(req, res) {
+        generatePage(req, res);
+    });
 
+    app.use(function(req, res) {
+        generatePage(req, res);
+    });
 
+    function generatePage(req, res) {
         // STEP 1) Find what JS and TS files are in src
         var files = {
             javascript: [],
@@ -118,16 +150,20 @@ gulp.task('dev', function() {
 
             xprtScripts = '\n<script type="text/javascript" src="app.js"></script>' + xprtScripts;
 
-            // STEP 3) Lets generate the list of scripts to send to the browser
-            for (file in files.javascript) {
-                xprtScripts = xprtScripts + '\n<script type="text/javascript" src="' + files.javascript[file].substr(4) + '"></script>';
+            if (liveReloadEnabled) {
+                xprtScripts = xprtScripts + '\n<script src="/socket.io/socket.io.js"></script>';
             }
+
+            // STEP 3) Lets generate the list of scripts to send to the browser
             for (file in files.typescript) {
                 xprtScripts = xprtScripts + '\n<script type="text/typescript" src="' + files.typescript[file].substr(4) + '"></script>';
             }
+            for (file in files.javascript) {
+                xprtScripts = xprtScripts + '\n<script type="text/javascript" src="' + files.javascript[file].substr(4) + '"></script>';
+            }
             xprtScripts = '\n<script src="vendor/less/dist/less.min.js"></script>' + xprtScripts;
-            xprtScripts = xprtScripts + '\n<script src="vendor/typescript-compile/js/typescript.min.js"></script>';
-            xprtScripts = xprtScripts + '\n<script src="vendor/typescript-compile/js/typescript.compile.min.js"></script>';
+            xprtScripts = xprtScripts + '\n<script src="vendor/typescript-compile/js/typescript.js"></script>';
+            xprtScripts = xprtScripts + '\n<script src="vendor/typescript-compile/js/typescript.compile.js"></script>';
 
             // STEP 4) Replace the styles and scripts from the production index
             // file with the newly generated ones
@@ -139,15 +175,33 @@ gulp.task('dev', function() {
             // Finally...
             res.send(tmpIndexFileData);
         });
-    });
+
+    }
 
     var server = app.listen(3000, function() {
 
         var host = server.address().address;
         var port = server.address().port;
 
-        console.log('Example app listening at http://%s:%s', host, port);
+        console.log('Web server src listening at http://%s:%s', host, port);
 
+    });
+
+    var io = require('socket.io')(server);
+    var chokidar = require('chokidar');
+    chokidar.watch(__dirname + '/src', {ignored: /[\/\\]\./}).on('all', function(event, path) {
+        if (event === 'add' || event === 'addDir') {
+            return;
+        }
+        console.log(event, path);
+        path = path.replace(__dirname + '/src/', '');
+        io.emit('cache-change', { type: event, file: path });
+    });
+
+    var http = require('http').Server(app);
+    http.listen(3001, function() {
+        liveReloadEnabled = true;
+        console.log('Live reload listening on *:3001');
     });
 
 });
@@ -304,10 +358,12 @@ var CompileModules = function() {
     folders.map(function(folder) {
         foldersPending = foldersPending + 1;
         gulp.src('./src/modules/' + folder + '/**/*.{js,ts}', {base:'src'})
-            .pipe(sourcemaps.init({debug: true}))
+            .pipe(sourcemaps.init())
             .pipe(gulpif(/(.+?)\.ts/, ts({
                 declarationFiles: true,
                 noExternalResolve: true,
+                emitDecoratorMetadata: true,
+                target: 'es5',
                 sourceRoot: 'modules/' + folder + '/',
                 base: '../../'
             })))
@@ -374,7 +430,9 @@ var BuildLess = function() {
     process.stdout.write(chalk.blue('(7/11)') + ' Building the LESS style files: ');
 
     gulp.src('./src/assets/less/app.less')
-        .pipe(less())
+        .pipe(less({
+            paths: [path.join(__dirname)]
+        }))
         .pipe(cssmin())
         .pipe(rename(function(path) {
             path.basename = 'app_core';
@@ -427,7 +485,7 @@ var ConcatJavascript = function() {
           'app.min.js',
           '*.j'
         ]))
-        .pipe(sourcemaps.init({debug: true, loadMaps: true}))
+        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concat('app_core.min.js'))
         .pipe(sourcemaps.write('../assets/'))
         .pipe(gulp.dest('./dist/assets/'))
