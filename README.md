@@ -11,7 +11,12 @@ A fresh boilerplate to create a modular AngularJS project. Use angular-fresh for
     git clone https://github.com/markwylde/angular-fresh.git
 
 ##### 2) Navigate to the dist folder
-	http://localhost/angular-fresh/dist/
+    http://localhost/angular-fresh/dist/
+
+##### 3) To run the dev mode with live editing
+    gulp dev
+
+Then browse to http://localhost:3000/
 
 ## Making changes
 When developing your project you should run gulp in the background. Gulp has three main tasks:
@@ -67,11 +72,12 @@ Out of the box angular-fresh comes with the following features:
  - IE8 compatable
  - Bootstrap enabled
  - JS validation
- - TypeScript compiler
+ - TypeScript compiler (Supporting TypeScript 1.5-alpha)
  - Configuration file to store settings
  - REST/API integration ready
  - Modular and segregated approach
  - Flexible file structure
+ - Local web server with live Dev Reloading
 
 #### License ####
 MIT License
