@@ -62,6 +62,23 @@ gulp.task('dev', function() {
         data = data + '\n' + '.run([\'$templateCache\', \'$route\', ';
         data = data + '\n' + 'function($templateCache, $route) { ';
         data = data + '\n' + '    var socket = window.io(); ';
+        data = data + '\n' + '    socket.on(\'less-change\', function(msg) { ';
+        data = data + '\n' + '        console.info(\'less-change: \', msg); ';
+        data = data + '\n' + '        var queryString = \'?reload=\' + new Date().getTime();';
+        data = data + '\n' + '        $(\'link[rel="stylesheet/less"]\').each(function () {';
+        data = data + '\n' + '            this.href = this.href.replace(/\\?.*|$/, queryString);';
+        data = data + '\n' + '        });';
+
+        data = data + '\n' + '        $(\'[id^="less:"]\').remove()';
+        data = data + '\n' + '        less.refresh(true, true, true);';
+        data = data + '\n' + '        less.refreshStyles(true, true, true);';
+        data = data + '\n' + '    }); ';
+        data = data + '\n' + '    socket.on(\'css-change\', function(msg) { ';
+        data = data + '\n' + '        var queryString = \'?reload=\' + new Date().getTime();';
+        data = data + '\n' + '        $(\'link[rel="stylesheet"]\').each(function () {';
+        data = data + '\n' + '            this.href = this.href.replace(/\?.*|$/, queryString);';
+        data = data + '\n' + '        });';
+        data = data + '\n' + '    }); ';
         data = data + '\n' + '    socket.on(\'cache-change\', function(msg) { ';
         data = data + '\n' + '        console.info(\'cache-change: \', msg); ';
         data = data + '\n' + '        $templateCache.remove(msg.file); ';
@@ -193,9 +210,14 @@ gulp.task('dev', function() {
         if (event === 'add' || event === 'addDir') {
             return;
         }
-        console.log(event, path);
         path = path.replace(__dirname + '/src/', '');
-        io.emit('cache-change', { type: event, file: path });
+        if (path.substr(-5) === '.less') {
+            io.emit('less-change', { type: event, file: path });
+        } else if (path.substr(-4) === '.css') {
+            io.emit('css-change', { type: event, file: path });
+        } else {
+            io.emit('cache-change', { type: event, file: path });
+        }
     });
 
     var http = require('http').Server(app);
