@@ -107,7 +107,7 @@ gulp.task('dev', function() {
         generatePage(req, res);
     });
 
-    app.get('/_tmp_typescript/compiled.js', function(req, res) {
+    app.get('/_tmp_typescript/*', function(req, res) {
 
         del(['./_tmp_typescript/*'], function() {
             var folders = getFolders('./src/modules/');
@@ -125,25 +125,31 @@ gulp.task('dev', function() {
                         base: '../../'
                     }))
                     .pipe(concat(folder + '.js'))
-                    .pipe(sourcemaps.write('../_tmp_typescript', {sourceRoot: 'modules/' + folder + '/'}))
+                    .pipe(sourcemaps.write('./', {
+                        sourceRoot: function(file) {
+                                        return './modules/' + folder + '/' + file;
+                                    }
+                    }))
                     .pipe(gulp.dest('./_tmp_typescript/'))
-
-                .on('finish', function() {
-                    gulp.src('./_tmp_typescript/*.js')
-                        .pipe(sourcemaps.init({loadMaps: true}))
-                        .pipe(concat('compiled.js'))
-                        .pipe(sourcemaps.write('../_tmp_typescript/'))
-                        .pipe(gulp.dest('./_tmp_typescript/'))
 
                     .on('finish', function() {
                         foldersPending = foldersPending - 1;
                         if (foldersPending === 0) {
-                            fs.readFile('./_tmp_typescript/compiled.js', 'utf8', function(err, data) {
-                                res.send(data);
-                            });
+
+                            gulp.src('./_tmp_typescript/*.js')
+                                .pipe(sourcemaps.init({loadMaps: true}))
+                                .pipe(concat('compiled.js'))
+                                .pipe(sourcemaps.write('./', {sourceRoot: '/'}))
+                                .pipe(gulp.dest('./_tmp_typescript/'))
+
+                            .on('finish', function() {
+                                fs.readFile('.' + req.url, 'utf8', function(err, data) {
+                                    res.send(data);
+                                    del(['./_tmp_typescript/']);
+                                });
+                            })
                         }
                     });
-                });
             });
         });
     });
