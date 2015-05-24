@@ -107,11 +107,53 @@ gulp.task('dev', function() {
         generatePage(req, res);
     });
 
+    app.get('/_tmp_typescript/compiled.js', function(req, res) {
+
+        del(['./_tmp_typescript/*'], function() {
+            var folders = getFolders('./src/modules/');
+            var foldersPending = 0;
+            folders.map(function(folder) {
+                foldersPending = foldersPending + 1;
+                gulp.src('./src/modules/' + folder + '/**/*.ts', {base:'src'})
+                    .pipe(sourcemaps.init())
+                    .pipe(ts({
+                        typescript: require('typescript'),
+                        declarationFiles: true,
+                        noExternalResolve: true,
+                        emitDecoratorMetadata: true,
+                        target: 'es5',
+                        base: '../../'
+                    }))
+                    .pipe(concat(folder + '.js'))
+                    .pipe(sourcemaps.write('../_tmp_typescript', {sourceRoot: 'modules/' + folder + '/'}))
+                    .pipe(gulp.dest('./_tmp_typescript/'))
+
+                .on('finish', function() {
+                    gulp.src('./_tmp_typescript/*.js')
+                        .pipe(sourcemaps.init({loadMaps: true}))
+                        .pipe(concat('compiled.js'))
+                        .pipe(sourcemaps.write('../_tmp_typescript/'))
+                        .pipe(gulp.dest('./_tmp_typescript/'))
+
+                    .on('finish', function() {
+                        foldersPending = foldersPending - 1;
+                        if (foldersPending === 0) {
+                            fs.readFile('./_tmp_typescript/compiled.js', 'utf8', function(err, data) {
+                                res.send(data);
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    });
+
     app.use(function(req, res) {
         generatePage(req, res);
     });
 
     function generatePage(req, res) {
+
         // STEP 1) Find what JS and TS files are in src
         var files = {
             javascript: [],
@@ -137,50 +179,27 @@ gulp.task('dev', function() {
 
             var xprtScripts = '';
 
-            // 2.1) Lets find what modules we have:
-            function getDirectories(srcpath) {
-                var path = require('path');
-                return fs.readdirSync(srcpath).filter(function(file) {
-                    return fs.statSync(path.join(srcpath, file)).isDirectory();
-                });
-            }
-            var modules = getDirectories('./src/modules');
-
-            // 2.2) Now lets push those module.js files to the top
-            var index;
-            for (var module in modules) {
-                index = files.javascript.indexOf('src/modules/' + modules[module] + '/module.js');
-
-                if (index > -1) {
-                    files.javascript.splice(index, 1);
-                }
-
-                xprtScripts = xprtScripts + '\n<script type="text/javascript" src="modules/' + modules[module] + '/module.js"></script>';
-            }
-
             // 2.3) app.js should be the first loaded, so lets bump that to the top
-            index = files.javascript.indexOf('src/app.js');
+            var index = files.javascript.indexOf('src/app.js');
 
             if (index > -1) {
                 files.javascript.splice(index, 1);
             }
-
-            xprtScripts = '\n<script type="text/javascript" src="app.js"></script>' + xprtScripts;
 
             if (liveReloadEnabled) {
                 xprtScripts = xprtScripts + '\n<script src="/socket.io/socket.io.js"></script>';
             }
 
             // STEP 3) Lets generate the list of scripts to send to the browser
-            for (file in files.typescript) {
-                xprtScripts = xprtScripts + '\n<script type="text/typescript" src="' + files.typescript[file].substr(4) + '"></script>';
-            }
+
+            xprtScripts = xprtScripts + '\n<script type="text/javascript" src="app.js"></script>';
+
             for (file in files.javascript) {
                 xprtScripts = xprtScripts + '\n<script type="text/javascript" src="' + files.javascript[file].substr(4) + '"></script>';
             }
+
             xprtScripts = '\n<script src="vendor/less/dist/less.min.js"></script>' + xprtScripts;
-            xprtScripts = xprtScripts + '\n<script src="vendor/typescript-compile/js/typescript.js"></script>';
-            xprtScripts = xprtScripts + '\n<script src="vendor/typescript-compile/js/typescript.compile.js"></script>';
+            xprtScripts = xprtScripts + '\n<script type="text/javascript" src="_tmp_typescript/compiled.js"></script>';
 
             // STEP 4) Replace the styles and scripts from the production index
             // file with the newly generated ones
@@ -191,6 +210,7 @@ gulp.task('dev', function() {
 
             // Finally...
             res.send(tmpIndexFileData);
+
         });
 
     }
@@ -382,11 +402,12 @@ var CompileModules = function() {
         gulp.src('./src/modules/' + folder + '/**/*.{js,ts}', {base:'src'})
             .pipe(sourcemaps.init())
             .pipe(gulpif(/(.+?)\.ts/, ts({
+                typescript: require('typescript'),
                 declarationFiles: true,
                 noExternalResolve: true,
                 emitDecoratorMetadata: true,
                 target: 'es5',
-                sourceRoot: 'modules/' + folder + '/',
+                //sourceRoot: 'modules/' + folder + '/',
                 base: '../../'
             })))
             .pipe(concat(folder + '.js'))
@@ -394,7 +415,7 @@ var CompileModules = function() {
             .pipe(rename(function(path) {
                 path.extname = '.min.js';
             }))
-            .pipe(sourcemaps.write('../assets', {sourceRoot: '/src'}))
+            .pipe(sourcemaps.write('../assets', {sourceRoot: 'modules/' + folder + '/'}))
             .pipe(gulp.dest('./dist/assets/'))
 
         .on('finish', function() {
@@ -480,8 +501,8 @@ var CopyAssets = function() {
 
     process.stdout.write(chalk.blue('(8/11)') + ' Copy the image assets to dist: ');
 
-    gulp.src(['./src/assets/img/*.*', './src/assets/img/**/*'])
-        .pipe(copy('./dist/assets/img', { prefix: 3 }))
+    gulp.src(['./src/assets/images/*.*', './src/assets/images/**/*'])
+        .pipe(copy('./dist/assets/images', { prefix: 3 }))
 
     .on('end', function() {
         deferred.resolve(true);
@@ -505,7 +526,8 @@ var ConcatJavascript = function() {
         .pipe(order([
           'view.min.js',
           'app.min.js',
-          '*.j'
+          'Core.min.js',
+          '*.js'
         ]))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(concat('app_core.min.js'))
